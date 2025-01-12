@@ -1,40 +1,103 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
-import { Gif } from ".";
+import {
+  Alert,
+  Button,
+  Image,
+  Keyboard,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
+import StarRating from "react-native-star-rating-widget";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DarkColor } from "@/types";
 
 export default function Details() {
-  const { gifId } = useLocalSearchParams();
+  const { gifId, url, title } = useLocalSearchParams();
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
   const navigation = useNavigation();
-  const apiKey = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
-
-  const [gif, setGif] = useState<Gif>();
 
   useEffect(() => {
-    const fetchGifs = async () => {
-      const response = await fetch(
-        `https://api.giphy.com/v1/gifs/${gifId}?api_key=${apiKey}`
-      );
-      const data = await response.json();
-      setGif(data.data);
-      console.log(data);
+    navigation.setOptions({ title: title });
+    const getData = async () => {
+      try {
+        const value = await AsyncStorage.getItem(`${gifId}`);
+        if (value !== null) {
+          const { rating, comment } = JSON.parse(value);
+          setRating(rating);
+          setComment(comment);
+        }
+      } catch (e) {
+        console.error("Error reading data:", e);
+      }
+    };
+    getData();
+  }, [navigation, title, gifId]);
+
+  const submit = async () => {
+    Keyboard.dismiss();
+    if (rating === 0) {
+      Alert.alert("Please provide star ratings!");
+      return;
     }
-    fetchGifs();
-  }, [apiKey, gifId]);
-
-  useEffect(() => {
-    navigation.setOptions({ title: `${gif?.title}` });
-  }, [navigation, gif]);
+    console.log("Rating:", rating);
+    console.log("Comment:", comment);
+    try {
+      await AsyncStorage.setItem(
+        `${gifId}`,
+        JSON.stringify({ rating, comment })
+      );
+      Alert.alert("Thanks for your feedback!");
+    } catch (e) {
+      console.error("Error saving data:", e);
+    }
+  };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      {gif && <Image source={{ uri: gif?.images?.downsized?.url }} style={{ width: '100%', height: 200 }} />}
+    <View>
+      <Image source={{ uri: `${url}` }} style={styles.image} accessibilityLabel={`Image name ${title}`}/>
+      <View style={styles.container}>
+      <StarRating rating={rating} onChange={setRating} starSize={60} accessibilityLabel="Star ratings out of 5" style={styles.star} color={DarkColor}/>
+      <TextInput
+        value={comment}
+        onChangeText={setComment}
+        placeholder="Write your comment..."
+        style={styles.input}
+        multiline
+      />
+      <Button
+        title="Submit"
+        onPress={submit}
+        color={DarkColor}
+        accessibilityLabel="Submit your rating and comment"
+      />
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { 
+    padding: 20,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+  },
+  star: {
+    alignSelf: "center",
+  },
+  input: {
+    width: "100%",
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#f4511e",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 20,
+    textAlignVertical: "top",
+  },
+});

@@ -1,51 +1,89 @@
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
-
-export type Gif = {
-  id: string;
-  title: string;
-  images: {
-    downsized: {
-      url: string;
-    };
-  }
-};
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { DarkColor, Gif } from "@/types";
+import useGifs from "@/src/hooks/useGifs";
+import { useCallback } from "react";
 
 export default function Index() {
-  const apiKey = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
-  const [gifs, setGifs] = useState<Gif[]>([]);
+  const { pullToRefresh, search, loadMore, loading, query, gifs } = useGifs();
 
-  useEffect(() => {
-    const fetchGifs = async () => {
-      const response = await fetch(
-        `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=15&rating=g`
-      );
-      const data = await response.json();
-      setGifs(data.data);
-      console.log(data);
-    }
-    fetchGifs();
-  }, [apiKey]);
+  const onPress = useCallback((item: Gif) => {
+    router.push({
+      pathname: `/[gifId]`,
+      params: {
+        gifId: item.id,
+        url: item.images?.downsized?.url,
+        title: item.title
+      }
+    });
+  }, []);
 
-  const renderItem = ({ item }: { item: Gif }) => (
-    <TouchableOpacity onPress={() => router.push(`/${item.id}`)} style={{ padding: 15, margin: 15, backgroundColor: 'white' }}>
-      <Image source={{ uri: item.images?.downsized?.url }} style={{ width: '100%', height: 200 }} />
-      <Text style={{marginVertical: 15}}>{item.title}</Text>
+  const renderItem = useCallback(({ item }: { item: Gif }) => (
+    <TouchableOpacity onPress={() => onPress(item)} style={styles.card}>
+      <Image source={{ uri: item.images?.downsized?.url }} style={styles.image} />
+      <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
     </TouchableOpacity>
-  );
+  ), [onPress]);
 
   return (
     <View
-      style={{
-        // flex: 1,
-      }}
+      style={styles.container}
     >
+      <TextInput
+        style={styles.input}
+        placeholder="Search GIFs"
+        returnKeyType="search"
+        defaultValue={query}
+        // onChangeText={search}
+        onSubmitEditing={search}
+        clearButtonMode="always"
+      />
       <FlatList
         data={gifs}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-       />
+        ListFooterComponent={<View style={{ height: 60, justifyContent: 'center' }} >
+          {loading && <ActivityIndicator size="large" color={DarkColor} />}
+        </View>}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.1}
+        onRefresh={pullToRefresh}
+        refreshing={false}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  input: {
+    margin: 15,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#f5e4df',
+  },
+  card: {
+    marginHorizontal: 15,
+    marginVertical: 10,
+    backgroundColor: '#f5e4df',
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+  },
+  title: {
+    padding: 15,
+    fontSize: 16,
+    fontWeight: 'semibold',
+  }
+});
