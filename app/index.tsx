@@ -8,6 +8,7 @@ import { Image } from 'expo-image';
 export default function Index() {
   const { pullToRefresh, search, loadMore, loading, query, gifs } = useGifs();
 
+  // When the user taps on a GIF, navigate to the GIF details screen
   const onPress = useCallback((item: Gif) => {
     router.push({
       pathname: `/[gifId]`,
@@ -19,6 +20,7 @@ export default function Index() {
     });
   }, []);
 
+  // Render each GIF in a card
   const renderItem = useCallback(({ item }: { item: Gif }) => (
     <TouchableOpacity onPress={() => onPress(item)} style={styles.card}>
       <Image source={{ uri: item.images?.downsized?.url }} style={styles.image} />
@@ -49,7 +51,7 @@ export default function Index() {
         onEndReached={loadMore}
         onEndReachedThreshold={0.1}
         onRefresh={pullToRefresh}
-        refreshing={false}
+        refreshing={loading}
       />
     </View>
   );

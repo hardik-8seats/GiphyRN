@@ -11,6 +11,7 @@ export default function useGifs() {
     const [hasMore, setHasMore] = useState(true);
     const [query, setQuery] = useState('');
 
+    // Fetch GIFs from the GIPHY API
     const fetchGifs = useCallback(async () => {
         if (loading || !hasMore) return;
         setLoading(true);
@@ -29,17 +30,20 @@ export default function useGifs() {
         }
     }, [loading, hasMore, query, offset, apiKey, apiURL]);
 
+    // Fetch GIFs when the component mounts
     useEffect(() => {
         fetchGifs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Reset the GIFs when the user pulls to refresh
     const pullToRefresh = useCallback(() => {
         setGifs([]);
         setOffset(0);
         setHasMore(true);
     }, []);
 
+    // Search for GIFs when the user submits the search input
     const search = useCallback((e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
         setGifs([]);
         setOffset(0);
@@ -47,6 +51,7 @@ export default function useGifs() {
         setQuery(e.nativeEvent.text);
     }, []);
 
+    // Load more GIFs when the user scrolls to the end of the list
     const loadMore = useCallback(() => {
         if (!loading && hasMore) {
             fetchGifs();
