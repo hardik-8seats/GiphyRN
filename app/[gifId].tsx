@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -13,16 +13,14 @@ import StarRating from "react-native-star-rating-widget";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkColor } from "@/types";
 import { Image } from 'expo-image';
+import React from "react";
 
 export default function Details() {
   const { gifId, url, title } = useLocalSearchParams();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  const navigation = useNavigation();
-
   useEffect(() => {
-    navigation.setOptions({ title: title });
     const getData = async () => {
       try {
         const value = await AsyncStorage.getItem(`${gifId}`);
@@ -36,7 +34,7 @@ export default function Details() {
       }
     };
     getData();
-  }, [navigation, title, gifId]);
+  }, [gifId]);
 
   const submit = async () => {
     Keyboard.dismiss();
@@ -44,8 +42,6 @@ export default function Details() {
       Alert.alert("Please provide star ratings!");
       return;
     }
-    console.log("Rating:", rating);
-    console.log("Comment:", comment);
     try {
       await AsyncStorage.setItem(
         `${gifId}`,
@@ -59,22 +55,22 @@ export default function Details() {
 
   return (
     <KeyboardAvoidingView behavior="position" style={styles.keyboardView}>
-      <Image source={{ uri: `${url}` }} style={styles.image} accessibilityLabel={`Image name ${title}`}/>
+      <Image source={{ uri: `${url}` }} style={styles.image} accessibilityLabel={`Image name ${title}`} />
       <View style={styles.container}>
-      <StarRating rating={rating} onChange={setRating} starSize={60} accessibilityLabel="Star ratings out of 5" style={styles.star} color={DarkColor}/>
-      <TextInput
-        value={comment}
-        onChangeText={setComment}
-        placeholder="Write your comment..."
-        style={styles.input}
-        multiline
-      />
-      <Button
-        title="Submit"
-        onPress={submit}
-        color={DarkColor}
-        accessibilityLabel="Submit your rating and comment"
-      />
+        <StarRating rating={rating} onChange={setRating} starSize={60} accessibilityLabel="Star ratings out of 5" style={styles.star} color={DarkColor} />
+        <TextInput
+          value={comment}
+          onChangeText={setComment}
+          placeholder="Write your comment..."
+          style={styles.input}
+          multiline
+        />
+        <Button
+          title="Submit"
+          onPress={submit}
+          color={DarkColor}
+          accessibilityLabel="Submit your rating and comment"
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -84,7 +80,7 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
-  container: { 
+  container: {
     padding: 20,
   },
   image: {

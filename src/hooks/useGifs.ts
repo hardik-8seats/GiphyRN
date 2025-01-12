@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { NativeSyntheticEvent, TextInputSubmitEditingEventData } from "react-native";
 
 export default function useGifs() {
+    const apiURL = process.env.EXPO_PUBLIC_API_URL;
     const apiKey = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
     const [gifs, setGifs] = useState<Gif[]>([]);
     const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export default function useGifs() {
         if (loading || !hasMore) return;
         setLoading(true);
         try {
-            const url = `https://api.giphy.com/v1/gifs/${query ? 'search' : 'trending'}?api_key=${apiKey}&limit=15&offset=${offset}${query ? `&q=${query}` : ''}`;
+            const url = `${apiURL}/${query ? 'search' : 'trending'}?api_key=${apiKey}&limit=15&offset=${offset}${query ? `&q=${query}` : ''}`;
             const response = await fetch(url);
             const data = await response.json();
             if (offset === 0) setGifs(data.data);
@@ -26,7 +27,7 @@ export default function useGifs() {
         } finally {
             setLoading(false);
         }
-    }, [loading, hasMore, query, offset, apiKey]);
+    }, [loading, hasMore, query, offset, apiKey, apiURL]);
 
     useEffect(() => {
         fetchGifs();

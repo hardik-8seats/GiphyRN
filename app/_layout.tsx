@@ -5,12 +5,11 @@ import { Platform, StatusBar } from "react-native";
 export default function RootLayout() {
   if (Platform.OS === 'android') StatusBar.setBackgroundColor(DarkColor);
 
-  return <Stack >
+  return <Stack screenOptions={headerStyle}>
     <Stack.Screen name="index" options={{
       title: 'GIPHY',
-      ...headerStyle
     }} />
-    <Stack.Screen name="[gifId]" options={headerStyle} />
+    <Stack.Screen name="[gifId]" options={{title: 'Feedback'}}/>
   </Stack>;
 }
 
