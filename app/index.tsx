@@ -1,19 +1,51 @@
 import { router } from "expo-router";
-import { Button, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+
+export type Gif = {
+  id: string;
+  title: string;
+  images: {
+    downsized: {
+      url: string;
+    };
+  }
+};
 
 export default function Index() {
   const apiKey = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
+  const [gifs, setGifs] = useState<Gif[]>([]);
+
+  useEffect(() => {
+    const fetchGifs = async () => {
+      const response = await fetch(
+        `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=15&rating=g`
+      );
+      const data = await response.json();
+      setGifs(data.data);
+      console.log(data);
+    }
+    fetchGifs();
+  }, [apiKey]);
+
+  const renderItem = ({ item }: { item: Gif }) => (
+    <TouchableOpacity onPress={() => router.push(`/${item.id}`)} style={{ padding: 15, margin: 15, backgroundColor: 'white' }}>
+      <Image source={{ uri: item.images?.downsized?.url }} style={{ width: '100%', height: 200 }} />
+      <Text style={{marginVertical: 15}}>{item.title}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View
       style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        // flex: 1,
       }}
     >
-      <Text>API KEY: {apiKey}</Text>
-      <Button title="Go to details page" onPress={() => router.push("/12312dasq3d")}/>
+      <FlatList
+        data={gifs}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+       />
     </View>
   );
 }
