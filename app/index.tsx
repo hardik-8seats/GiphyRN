@@ -1,8 +1,9 @@
 import { router } from "expo-router";
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DarkColor, Gif } from "@/types";
 import useGifs from "@/src/hooks/useGifs";
 import { useCallback } from "react";
+import { Image } from 'expo-image';
 
 export default function Index() {
   const { pullToRefresh, search, loadMore, loading, query, gifs } = useGifs();
@@ -40,7 +41,7 @@ export default function Index() {
       />
       <FlatList
         data={gifs}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         ListFooterComponent={<View style={{ height: 60, justifyContent: 'center' }} >
           {loading && <ActivityIndicator size="large" color={DarkColor} />}
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 220,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },

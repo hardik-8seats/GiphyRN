@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Button,
-  Image,
   Keyboard,
+  KeyboardAvoidingView,
   StyleSheet,
   TextInput,
   View,
@@ -12,6 +12,7 @@ import {
 import StarRating from "react-native-star-rating-widget";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkColor } from "@/types";
+import { Image } from 'expo-image';
 
 export default function Details() {
   const { gifId, url, title } = useLocalSearchParams();
@@ -57,7 +58,7 @@ export default function Details() {
   };
 
   return (
-    <View>
+    <KeyboardAvoidingView behavior="position" style={styles.keyboardView}>
       <Image source={{ uri: `${url}` }} style={styles.image} accessibilityLabel={`Image name ${title}`}/>
       <View style={styles.container}>
       <StarRating rating={rating} onChange={setRating} starSize={60} accessibilityLabel="Star ratings out of 5" style={styles.star} color={DarkColor}/>
@@ -75,17 +76,20 @@ export default function Details() {
         accessibilityLabel="Submit your rating and comment"
       />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
   container: { 
     padding: 20,
   },
   image: {
     width: "100%",
-    height: 200,
+    height: 350,
   },
   star: {
     alignSelf: "center",
