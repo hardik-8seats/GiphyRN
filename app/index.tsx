@@ -1,6 +1,8 @@
 import { Text, View } from "react-native";
 
 export default function Index() {
+  const apiKey = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
+
   return (
     <View
       style={{
@@ -9,7 +11,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text>API KEY: {apiKey}</Text>
     </View>
   );
 }
